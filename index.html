@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>TikTok 認可コード受け取り</title>
+<style>
+:root{--bg:#0E1114;--panel:#171C21;--line:#2A333B;--ink:#EAEFF2;--soft:#93A3AC;
+      --cyan:#00F2EA;--red:#FF0050}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);
+     font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic","Noto Sans JP",sans-serif;
+     line-height:1.8;display:flex;align-items:center;justify-content:center;padding:28px}
+main{width:100%;max-width:660px;display:flex;flex-direction:column;gap:22px}
+.brand{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;letter-spacing:.2em;
+       text-transform:uppercase;color:var(--cyan);margin:0}
+h1{font-size:23px;margin:6px 0 0;letter-spacing:.02em}
+.lead{color:var(--soft);font-size:14px;margin:0}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:22px}
+.label{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;letter-spacing:.12em;
+       color:var(--soft);text-transform:uppercase;margin:0 0 10px}
+#code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;word-break:break-all;
+      background:#0B0E11;border:1px solid var(--line);border-radius:7px;padding:15px;
+      margin:0;color:var(--cyan);user-select:all;line-height:1.7}
+button{margin-top:14px;width:100%;padding:13px;border:0;border-radius:7px;cursor:pointer;
+       background:var(--cyan);color:#062321;font-weight:700;font-size:14px;
+       font-family:inherit;transition:opacity .15s}
+button:hover{opacity:.86}
+button:focus-visible{outline:2px solid var(--red);outline-offset:3px}
+button[disabled]{opacity:.5;cursor:default}
+.warn{border-left:3px solid var(--red);background:#1C1216;border-radius:0 8px 8px 0;
+      padding:15px 18px;font-size:13.5px;color:#F3D9DF}
+.warn b{color:var(--red)}
+.none{color:var(--soft);font-size:14px;margin:0}
+ol{margin:10px 0 0;padding-left:20px;font-size:13.5px;color:var(--soft)}
+li{margin:5px 0}
+footer{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;color:#5B6B74;
+       border-top:1px solid var(--line);padding-top:14px;line-height:1.9}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <p class="brand">Mizuho Rice Analytics</p>
+    <h1>TikTok 認可コード受け取り</h1>
+    <p class="lead">TikTokの認可が完了すると、このページのアドレスにコードが付いて戻ってきます。</p>
+  </header>
+
+  <section class="panel" id="box">
+    <p class="label">Authorization code</p>
+    <p id="code">読み込み中…</p>
+    <button id="copy" disabled>コードをコピー</button>
+  </section>
+
+  <div class="warn" id="warn" hidden>
+    <b>このコードは他人に渡さないでください。</b>
+    アクセストークンと交換できる鍵そのものです。数分で失効するので、取得したらすぐ担当者に渡してください。
+    このページはコードを画面に表示するだけで、<b>どこにも送信していません</b>（通信は一切発生しません）。
+  </div>
+
+  <footer>
+    株式会社ミズホ ／ TikTok Accounts API 連携用のコールバックページ<br>
+    静的ページのみ。データの収集・保存・送信は行いません。
+  </footer>
+</main>
+
+<script>
+(function () {
+  // URLからcodeを取り出して表示するだけ。fetchもXHRも使わない（外部送信ゼロ）。
+  var params = new URLSearchParams(location.search);
+  var code = params.get('code');
+  var err = params.get('error') || params.get('error_description');
+  var el = document.getElementById('code');
+  var btn = document.getElementById('copy');
+
+  if (code) {
+    el.textContent = code;
+    btn.disabled = false;
+    document.getElementById('warn').hidden = false;
+    btn.addEventListener('click', function () {
+      navigator.clipboard.writeText(code).then(function () {
+        btn.textContent = 'コピーしました';
+        setTimeout(function () { btn.textContent = 'コードをコピー'; }, 1800);
+      }, function () {
+        btn.textContent = '手動で選択してコピーしてください';
+      });
+    });
+  } else if (err) {
+    el.style.color = '#FF0050';
+    el.textContent = '認可されませんでした: ' + err;
+  } else {
+    el.style.color = '#93A3AC';
+    el.innerHTML = 'まだコードはありません。<br><br>'
+      + 'TikTokの認可URLを開いて承認すると、このページに <code>?code=…</code> が付いた状態で戻ってきます。';
+  }
+})();
+</script>
+</body>
+</html>
